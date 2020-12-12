@@ -11,54 +11,90 @@ import re
 import os
 import time
 import datetime
+import pickle
 
-porst = PorterStemmer()
 
 def text2tokens(text):
     """
     lowercasing, stopword removal, stemming
     :param text: a text string
     :return: a tokenized string with preprocessing (e.g. stemming, stopword removal, ...) applied
+
+    Problems/TODO:
+    - stop word deletion very slow -> use smaller list of words (siehe LVA Forum)
+    - Special character stripping & stemming: e.g. heavy-hearted => heavyheart
+    - Umlaut-Stripping?
+    - http-Link-tokens irrelevant? => e.g. httpwwwdinosauriacomdmlcladosauropodahtml
     """
+    porst = PorterStemmer()
     lower = text.casefold()
     tokens = ""
     for word in lower.split():
-        if word in stopwords.words('english'):
-            continue
+        # if word in stopwords.words('english'):
+        #     continue
         alphaNumOnly = re.sub(r'[^a-zA-Z0-9 ]', '', word)
         token = porst.stem(alphaNumOnly)
         tokens += token + " "
 
-    return tokens
+    return tokens[:-1]
 
-testindex = idx.InvertedIndex()
-tree = ET.parse('dev-set/1.xml')
+def xml2index(artLocation, outFile, index):
+    # index = idx.InvertedIndex()
+    xmlTree = ET.parse(artLocation)
+    articles = xmlTree.xpath('//article')
+    artCount = len(articles)
+    counter = 1
+    startTime = time.time()
+    for a in articles:
+        # reduce number of articles for quick testing:
+        # if (counter > 1):
+        #     continue
+        artID = a.xpath('header/id/text()')[0]
+        contentstring = a.xpath('header/title/text()')[0] + a.xpath('bdy/text()')[0]
+        tokenstring = text2tokens(contentstring)
+        for tk in tokenstring.split(" "):
+            index.add(tk, artID)
+        perc = round(((counter-1) / artCount) * 100)
+        print("     Working on article " + str(counter) + " of " + str(artCount) + "...   (" + str(perc) + "% done)")
+        counter += 1
+
+    pickle.dump(index, outFile)
+
+    print("     Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))))
+
+def set2index(setLocation, outFileName):
+    outfile = open(outFileName, 'wb')
+    index = idx.InvertedIndex()
+    startTime = time.time()
+    fileCount = len(os.listdir(setLocation))
+    counter = 1
+    outfile = open(outFileName, 'wb')
+    for file in os.scandir(setLocation):
+        perc = round(((counter - 1) / fileCount) * 100)
+        print("File " + str(counter) + " of " + str(fileCount) + "...   (" + str(perc) + "% done)")
+        xml2index(file.path, outfile, index)
+        counter += 1
+
+    pickle.dump(index, outfile)
+
+    print("Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))))
 
 
-data = 'The Detroit College of Medicine was founded in 1868 in a building on Woodward Avenue. The Michigan College of Medicine was incorporated in 1879 and offered classes in the former Hotel Hesse at the intersection of Gratiot Avenue, Madison Avenue and St. Antoine Street. In 1885, the two schools merged to form the Detroit College of Medicine and occupied the former Michigan College of Medicine building. The college was reorganized and refinanced as the Detroit College of Medicine and Surgery in 1913, and five-years later, came under control of the Detroit Board of Education. In 1933, the Board of Education joined the Detroit College of Medicine and Surgery with the colleges of Liberal Arts, Education, Engineering, Pharmacy, and the Graduate School to form an institution of higher education called the Colleges of the City of Detroit. This was renamed Wayne University in 1934 and became a state-chartered institution, Wayne State University, in 1956.[3] The dean is Dr. Mark E. Schweitzer. '
-tok = text2tokens(data)
-for elmt in tok.split(" "): 
-    testindex.add(elmt, 123)
-print(testindex)
+# set2index('dev-set', 'testtesttest')
 
 
-# articles = tree.xpath('//article')
-# artCount = len(articles)
-# counter = 1
-# startTime = time.time()
-# for a in articles:
-#     if(counter > 3):
-#         continue
-#     artID = a.xpath('header/id/text()')[0]
-#     contentstring = a.xpath('header/title/text()')[0] + a.xpath('bdy/text()')[0]
-#     tokenstring = text2tokens(contentstring)
-#     for tk in tokenstring.split(" "):
-#         testindex.add(tk,artID)
-#     perc = round((counter/artCount)*100)
-#     os.system('cls')
-#     print("Working on article " + str(counter) + " of " + str(artCount) +"...   (" + str(perc) + "% done)")
-#     counter += 1
+# def testsearch(word, index):
+#     tk = text2tokens(word)
+#     ix = pickle.load(open(index, 'rb'))
+#     if word not in ix.index.keys():
+#         return tk + "not found."
+#     else:
+#         for key in ix.index.keys():
+#             if(word == key):
+#                 return "found in " + str(ix.index[key])
+#     return "error"
+#
+# article2index('dev-set/1.xml', 'testindex')
+# print(testsearch('ewfeiwfew', 'testindex'))
 
-# print(testindex)
-
-# print("Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))))
+# print(pickle.load(open('testindex','rb')))
