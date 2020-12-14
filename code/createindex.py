@@ -12,7 +12,11 @@ import os
 import time
 import datetime
 import pickle
+from pymongo import MongoClient
 
+client = MongoClient()
+db = client['GIR20']
+db_articles = db.articles
 
 def text2tokens(text):
     """
@@ -45,6 +49,8 @@ def xml2index(artLocation, outFile, index):
     artCount = len(articles)
     counter = 1
     startTime = time.time()
+    # Collect for faster insertss
+    documents = []
     for a in articles:
         # reduce number of articles for quick testing:
         # if (counter > 1):
@@ -52,12 +58,19 @@ def xml2index(artLocation, outFile, index):
         artID = a.xpath('header/id/text()')[0]
         contentstring = a.xpath('header/title/text()')[0] + a.xpath('bdy/text()')[0]
         tokenstring = text2tokens(contentstring)
-        for tk in tokenstring.split(" "):
+        token = tokenstring.split(" ")
+
+        for tk in token:
             index.add(tk, artID)
+
+        article_data = {'id': int(artID), 'wc': len(token), 'text': contentstring }
+        documents.append(article_data)
+
         perc = round(((counter-1) / artCount) * 100)
         print("     Working on article " + str(counter) + " of " + str(artCount) + "...   (" + str(perc) + "% done)")
         counter += 1
 
+    db_articles.insert_many(documents)
     pickle.dump(index, outFile)
 
     print("     Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))))
@@ -80,7 +93,21 @@ def set2index(setLocation, outFileName):
     print("Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))))
 
 
-# set2index('dev-set', 'testtesttest')
+def frequency(word, index):
+     tk = text2tokens(word)
+     ix = pickle.load(open(index, 'rb'))
+     if word not in ix.index.keys():
+         return tk + "not found."
+     else:
+        for key in ix.index.keys():
+             if(word == key):
+                 return "found in " + str(ix.index[key])
+     return "error"
+
+
+
+
+#set2index('../data/dev-set', 'testtesttest')
 
 
 # def testsearch(word, index):

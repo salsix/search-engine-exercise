@@ -17,7 +17,7 @@ def testsearch(word, indexFile):
                 return "\"" + tk + "\"" + " found in" + str(ix.index[key]) + " Execution Time: " + str(endTime)
     return "error"
 
-print(testsearch('f13', 'singleStreamTest'))
+print(testsearch('f13', 'testtesttest'))
 print(testsearch('wing', 'singleStreamTest'))
 print(testsearch('considered', 'singleStreamTest'))
 print(testsearch('consider', 'singleStreamTest'))
