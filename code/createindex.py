@@ -14,6 +14,7 @@ import datetime
 import pickle
 import gzip
 from pymongo import MongoClient
+import argparse
 
 GLOB_START_TIME = time.time()
 
@@ -99,3 +100,11 @@ def set2index(setLocation, outFileName):
         pickle.dump(index, file)
 
     print("Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Create index from input folder')
+    parser.add_argument('-f', type=str, help='Input folder', required=True)
+    parser.add_argument('index', type=str, help='Index file output path')
+    args = parser.parse_args()
+    set2index(args.f, args.index)
