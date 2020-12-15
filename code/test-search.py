@@ -1,4 +1,5 @@
 import createindex as ci
+import loadindexfromdisk as lix
 import pickle
 import time
 import datetime
@@ -6,7 +7,7 @@ import datetime
 def testsearch(word, indexFile):
     startTime = time.time()
     tk = ci.text2tokens(word)
-    ix = pickle.load(open(indexFile, 'rb'))
+    ix = lix.load(indexFile)
     if tk not in ix.index.keys():
         endTime = (datetime.timedelta(seconds=round(time.time() - startTime)))
         return "\"" + tk + "\"" + "not found. Execution Time: " + str(endTime)

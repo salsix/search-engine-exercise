@@ -42,12 +42,10 @@ def text2tokens(text):
 
     return tokens[:-1]
 
-def xml2index(artLocation, outFile, index):
-    # index = idx.InvertedIndex()
+def xml2index(artLocation, index):
     xmlTree = ET.parse(artLocation)
     articles = xmlTree.xpath('//article')
     artCount = len(articles)
-    counter = 1
     startTime = time.time()
     # Collect for faster insertss
     documents = []
@@ -56,72 +54,41 @@ def xml2index(artLocation, outFile, index):
         # if (counter > 1):
         #     continue
         artID = a.xpath('header/id/text()')[0]
-        contentstring = a.xpath('header/title/text()')[0] + a.xpath('bdy/text()')[0]
-        tokenstring = text2tokens(contentstring)
-        token = tokenstring.split(" ")
+        contentstring = ""
 
-        for tk in token:
+        if len(a.xpath('header/title/text()')) > 0:
+            contentstring += a.xpath('header/title/text()')[0]
+        else:
+            print("File " + artLocation + ", Art. " + str(artID) + ": No title found.")
+
+        if len(a.xpath('bdy/text()')) > 0:
+            contentstring += a.xpath('bdy/text()')[0]
+        else:
+            print("File " + artLocation + ", Art. " + str(artID) + ": No bodytext found.")
+
+        tokens = text2tokens(contentstring).split(" ")
+        for tk in tokens:
             index.add(tk, artID)
 
-        article_data = {'id': int(artID), 'wc': len(token), 'text': contentstring }
+        article_data = {'id': int(artID), 'wc': len(tokens), 'text': contentstring}
         documents.append(article_data)
 
-        perc = round(((counter-1) / artCount) * 100)
-        print("     Working on article " + str(counter) + " of " + str(artCount) + "...   (" + str(perc) + "% done)")
-        counter += 1
-
     db_articles.insert_many(documents)
-    pickle.dump(index, outFile)
 
     print("     Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))))
 
 def set2index(setLocation, outFileName):
-    outfile = open(outFileName, 'wb')
     index = idx.InvertedIndex()
     startTime = time.time()
     fileCount = len(os.listdir(setLocation))
     counter = 1
-    outfile = open(outFileName, 'wb')
     for file in os.scandir(setLocation):
         perc = round(((counter - 1) / fileCount) * 100)
         print("File " + str(counter) + " of " + str(fileCount) + "...   (" + str(perc) + "% done)")
-        xml2index(file.path, outfile, index)
+        xml2index(file.path, index)
         counter += 1
 
-    pickle.dump(index, outfile)
+    with gzip.open('../data/' + outFileName, 'wb') as file:
+        pickle.dump(index, file)
 
     print("Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))))
-
-
-def frequency(word, index):
-     tk = text2tokens(word)
-     ix = pickle.load(open(index, 'rb'))
-     if word not in ix.index.keys():
-         return tk + "not found."
-     else:
-        for key in ix.index.keys():
-             if(word == key):
-                 return "found in " + str(ix.index[key])
-     return "error"
-
-
-
-
-#set2index('../data/dev-set', 'testtesttest')
-
-
-# def testsearch(word, index):
-#     tk = text2tokens(word)
-#     ix = pickle.load(open(index, 'rb'))
-#     if word not in ix.index.keys():
-#         return tk + "not found."
-#     else:
-#         for key in ix.index.keys():
-#             if(word == key):
-#                 return "found in " + str(ix.index[key])
-#     return "error"
-#
-# article2index('dev-set/1.xml', 'testindex')
-# print(testsearch('ewfeiwfew', 'testindex'))
-
-# print(pickle.load(open('testindex','rb')))
