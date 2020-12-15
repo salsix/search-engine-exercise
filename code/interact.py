@@ -2,6 +2,7 @@ import loadindexfromdisk as lix
 from bm25 import BM25
 from tfidf import TFIDF
 from pymongo import MongoClient
+import argsparse
 
 scoring = 'TFIDF'
 other = 'BM25'
@@ -78,9 +79,12 @@ def ui_loop(index, bm25, tfidf):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Create index from input folder')
+    parser.add_argument('index', type=str, help='Index file output path')
+    args = parser.parse_args()
     print(" ~ Welcome to our search engine! ~ ")
     print('Preparing index...')
-    index = lix.load('../data/dev-set_index')
+    index = lix.load(args.index)
     bm25 = BM25(index)
     tfidf = TFIDF(index)
     print('Index ready, let\'s go!')
