@@ -59,27 +59,22 @@ def xml2index(artLocation, index):
         #     continue
         artID = a.xpath('header/id/text()')[0]
         contentstring = ""
-        stringlength = 0
 
         if len(a.xpath('header/title/text()')) > 0:
-            addTitle = a.xpath('header/title/text()')[0]
-            contentstring += addTitle
-            stringlength += len(addTitle)
+            contentstring += a.xpath('header/title/text()')[0]
         else:
             print("File " + artLocation + ", Art. " + str(artID) + ": No title found.")
 
         if len(a.xpath('bdy/text()')) > 0:
-            addTxt = a.xpath('bdy/text()')[0]
-            contentstring += addTxt
-            stringlength += len(addTxt)
+            contentstring += a.xpath('bdy/text()')[0]
         else:
             print("File " + artLocation + ", Art. " + str(artID) + ": No bodytext found.")
 
-        index.docLengths[artID] = stringlength
         tokens = text2tokens(contentstring).split(" ")
         for tk in tokens:
             index.add(tk, artID)
 
+        index.docLengths[artID] = len(tokens)
         article_data = {'id': int(artID), 'wc': len(tokens), 'text': contentstring}
         documents.append(article_data)
         counter += 1
