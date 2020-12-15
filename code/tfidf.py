@@ -32,7 +32,7 @@ class TFIDF:
                         docscores[docID] += tokenscore
                     else:
                         docscores[docID] = tokenscore
-        print(docscores)
+        return sorted(docscores.items(), key=lambda x: x[1], reverse=True)
 
 
 if __name__ == "__main__":
