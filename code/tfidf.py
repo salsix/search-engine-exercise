@@ -14,8 +14,8 @@ class TFIDF:
         if token in self.index.index.keys():
             for key, value in self.index.index[token].appearances.items():
                 documentfrequency += 1
-        zaehler = self.numberOfDocs - documentfrequency + 0.5
-        nenner = documentfrequency + 0.5
+        zaehler = self.numberOfDocs
+        nenner = documentfrequency + 1 # plus one for good measure und to avoid division by 0
         idf = math.log(zaehler/float(nenner))
         return idf
 
