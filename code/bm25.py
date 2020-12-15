@@ -47,7 +47,7 @@ class BM25:
                         docscores[docID] += tokenscore
                     else:
                         docscores[docID] = tokenscore
-        print(docscores)
+        return sorted(docscores.items(), key=lambda x: x[1], reverse=True)
 
 
 if __name__ == "__main__":
@@ -56,4 +56,7 @@ if __name__ == "__main__":
     '''
     index = lix.load('../data/eval-set_index')
     bmfunfundzwanzig = BM25(index)
-    bmfunfundzwanzig.search("cold war")
+    print(bmfunfundzwanzig.search("cold war")[0])
+    print(bmfunfundzwanzig.search("cold war")[1])
+    print(bmfunfundzwanzig.search("cold war")[2])
+    print(bmfunfundzwanzig.search("cold war")[3])
