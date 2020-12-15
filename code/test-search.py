@@ -4,10 +4,9 @@ import pickle
 import time
 import datetime
 
-def testsearch(word, indexFile):
+def testsearch(word, ix):
     startTime = time.time()
     tk = ci.text2tokens(word)
-    ix = lix.load(indexFile)
     if tk not in ix.index.keys():
         endTime = (datetime.timedelta(seconds=round(time.time() - startTime)))
         return "\"" + tk + "\"" + "not found. Execution Time: " + str(endTime)
@@ -18,7 +17,10 @@ def testsearch(word, indexFile):
                 return "\"" + tk + "\"" + " found in" + str(ix.index[key]) + " Execution Time: " + str(endTime)
     return "error"
 
-print(testsearch('f13', 'testtesttest'))
-print(testsearch('wing', 'singleStreamTest'))
-print(testsearch('considered', 'singleStreamTest'))
-print(testsearch('consider', 'singleStreamTest'))
+ix = lix.load('dev-set_index')
+
+print(testsearch('f13', ix))
+print(testsearch('wing', ix))
+print(testsearch('considered', ix))
+print(testsearch('consider', ix))
+

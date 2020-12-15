@@ -4,6 +4,7 @@ class InvertedIndex:
     
     def __init__(self):
         self.index = dict()
+        self.docLengths = dict()
 
     def __str__(self):
         ret = ""

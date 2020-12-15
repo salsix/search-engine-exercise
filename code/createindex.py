@@ -12,7 +12,10 @@ import os
 import time
 import datetime
 import pickle
+import gzip
 from pymongo import MongoClient
+
+GLOB_START_TIME = time.time()
 
 client = MongoClient()
 db = client['GIR20']
@@ -47,6 +50,7 @@ def xml2index(artLocation, index):
     articles = xmlTree.xpath('//article')
     artCount = len(articles)
     startTime = time.time()
+    counter = 1
     # Collect for faster insertss
     documents = []
     for a in articles:
@@ -55,27 +59,34 @@ def xml2index(artLocation, index):
         #     continue
         artID = a.xpath('header/id/text()')[0]
         contentstring = ""
+        stringlength = 0
 
         if len(a.xpath('header/title/text()')) > 0:
-            contentstring += a.xpath('header/title/text()')[0]
+            addTitle = a.xpath('header/title/text()')[0]
+            contentstring += addTitle
+            stringlength += len(addTitle)
         else:
             print("File " + artLocation + ", Art. " + str(artID) + ": No title found.")
 
         if len(a.xpath('bdy/text()')) > 0:
-            contentstring += a.xpath('bdy/text()')[0]
+            addTxt = a.xpath('bdy/text()')[0]
+            contentstring += addTxt
+            stringlength += len(addTxt)
         else:
             print("File " + artLocation + ", Art. " + str(artID) + ": No bodytext found.")
 
+        index.docLengths[artID] = stringlength
         tokens = text2tokens(contentstring).split(" ")
         for tk in tokens:
             index.add(tk, artID)
 
         article_data = {'id': int(artID), 'wc': len(tokens), 'text': contentstring}
         documents.append(article_data)
+        counter += 1
 
     db_articles.insert_many(documents)
 
-    print("     Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))))
+    print("     Done. Execution Time: " + str(datetime.timedelta(seconds=round(time.time() - startTime))) + ", time since start: " + str(datetime.timedelta(seconds=round(time.time() - GLOB_START_TIME))))
 
 def set2index(setLocation, outFileName):
     index = idx.InvertedIndex()
@@ -88,6 +99,7 @@ def set2index(setLocation, outFileName):
         xml2index(file.path, index)
         counter += 1
 
+    print("Pickling and Zipping...")
     with gzip.open('../data/' + outFileName, 'wb') as file:
         pickle.dump(index, file)
 
