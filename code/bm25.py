@@ -54,9 +54,7 @@ if __name__ == "__main__":
     '''
     just for testing
     '''
-    index = lix.load('../data/eval-set_index')
+    index = lix.load('../data/dev-set_index')
     bmfunfundzwanzig = BM25(index)
-    print(bmfunfundzwanzig.search("cold war")[0])
-    print(bmfunfundzwanzig.search("cold war")[1])
-    print(bmfunfundzwanzig.search("cold war")[2])
-    print(bmfunfundzwanzig.search("cold war")[3])
+    print(bmfunfundzwanzig.search("landslide malaysia Find information about landslides that occur in Malaysia."))
+
