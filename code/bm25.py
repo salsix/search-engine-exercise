@@ -54,6 +54,6 @@ if __name__ == "__main__":
     '''
     just for testing
     '''
-    index = lix.load('dev-set-index')
+    index = lix.load('../data/eval-set_index')
     bmfunfundzwanzig = BM25(index)
-    bmfunfundzwanzig.search("test")
+    bmfunfundzwanzig.search("cold war")
