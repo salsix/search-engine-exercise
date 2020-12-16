@@ -5,6 +5,7 @@ from pymongo import MongoClient
 import lxml.html as parser
 import re
 import os
+import argparse
 
 scoring = 'TFIDF'
 other = 'BM25'
@@ -13,8 +14,12 @@ client = MongoClient()
 db = client['GIR20']
 db_articles = db.articles
 
+parser = argparse.ArgumentParser(description='Interact with our search engine index')
+parser.add_argument('index', type=str, help='Index file path')
+args = parser.parse_args()
+
 print("Preparing the index...")
-index = lix.load('../data/dev-set_index')
+index = lix.load(args.index)
 bm25 = BM25(index)
 tfidf = TFIDF(index)
 print("Index ready")
