@@ -4,6 +4,7 @@ from tfidf import TFIDF
 from pymongo import MongoClient
 import lxml.html as parser
 import re
+import os
 
 scoring = 'TFIDF'
 other = 'BM25'
@@ -41,9 +42,12 @@ def list_articles(results, counter):
         artID = int(art[0])
         fullart = db_articles.find_one({'id': artID})
         print(fullart['text'])
+        list_articles(results, counter)
     elif cmd == 'n':
+        os.system('cls')
         list_articles(results, counter+10)
     elif cmd == 'p':
+        os.system('cls')
         if counter == 0:
             print('Can\'t go back, this is the first page.')
             list_articles(results, counter)
@@ -52,7 +56,9 @@ def list_articles(results, counter):
     elif cmd == 'q':
         ui_loop()
     elif cmd == 'x':
+        os.system('cls')
         exploration_mode()
+    os.system('cls')
     list_articles(results, counter)
 
 
@@ -72,13 +78,15 @@ def exploration_mode():
 
 def evaluation_mode(runname):
     print("Generating evaluation file...")
-    resultfile = open('../retrieval_results/' + scoring + '-title-description_' + runname + '.txt', 'w')
+    filename = '../retrieval_results/' + scoring + '-title-description_' + runname + '.txt'
+    resultfile = open(filename, 'w')
     xmltree = parser.parse('../data/2010-topics.xml')
     topics = xmltree.xpath('//topic')
     counter = 1
     topiccount = len(topics)
     for t in topics:
-        print("Evaluating topic " + str(counter) + " of " + str(topiccount))
+        os.system('cls')
+        print("Evaluating topic " + str(counter) + " of " + str(topiccount) + '...')
         counter += 1
         topicid = t.xpath('@id')[0]
         title = t.xpath('title/text()')[0]
@@ -92,17 +100,29 @@ def evaluation_mode(runname):
             # topic-id, Q0, doc-id, rank, score, run-name
             resultfile.write(topicid + ' ' + 'Q0 ' + str(results[i][0]) + ' ' + str(i+1) + ' ' + str(results[i][1]) + ' ' + runname)
             resultfile.write('\n')
+
     resultfile.close()
+    print('Evaluation done. Result saved in ' + filename)
+    print("(e) back to evaluation | (q) back to main menu")
+    cmd = input('> ')
+    if cmd == 'q':
+        ui_loop()
+    elif cmd == 'e':
+        os.system('cls')
+        evaluation_mode()
     ui_loop()
 
 def ui_loop():
     global scoring, other
+    os.system('cls')
     print("### Main menu ###")
     print("Scoring: [{}]\nChoose a mode \n (X) Exploration mode \n (E) Evaluation mode \n (S) Switch to {} \n (Q) Quit".format(scoring,other)) 
     cmd = input('> ').lower()
     if cmd in ['x', 'exploration']:
+        os.system('cls')
         exploration_mode()
     elif cmd in ['e', 'Evaluation']:
+        os.system('cls')
         print('Please enter a name for this run.')
         runname = input('> ')
         evaluation_mode(runname)
