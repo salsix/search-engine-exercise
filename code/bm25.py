@@ -34,19 +34,37 @@ class BM25:
         return score
 
     def search(self, query):
+        # docscores = {}
+        # tokenstring = crix.text2tokens(query)
+        # for token in tokenstring.split(" "):
+        #     idf = self.calc_idf(token)
+        #     documentfrequency = 0
+        #     if token in self.index.index.keys():
+        #         for docID, frequency in self.index.index[token].appearances.items():
+        #             documentfrequency += 1
+        #             tokenscore = self.calc_score(docID, frequency)*idf
+        #             if docID in docscores.keys():
+        #                 docscores[docID] += tokenscore
+        #             else:
+        #                 docscores[docID] = tokenscore
+        #     for docID in self.index.docLengths.keys():
+        #         if docID in docscores.keys:
+        #             pass
+
         docscores = {}
+        for docID in self.index.docLengths.keys():
+            docscores[docID] = 0
         tokenstring = crix.text2tokens(query)
-        for token in tokenstring.split(" "):
+        for token in tokenstring.split(' '):
             idf = self.calc_idf(token)
             documentfrequency = 0
-            if token in self.index.index.keys():
-                for docID, frequency in self.index.index[token].appearances.items():
-                    documentfrequency += 1
-                    tokenscore = self.calc_score(docID, frequency)*idf
-                    if docID in docscores.keys():
-                        docscores[docID] += tokenscore
-                    else:
-                        docscores[docID] = tokenscore
+            for docID in self.index.docLengths.keys():
+                if token in self.index.index.keys() and docID in self.index.index[token].appearances.keys():
+                    tokenscore = self.calc_score(docID, self.index.index[token].appearances[docID]) * idf
+                else:
+                    tokenscore = self.calc_score(docID, 0)
+                docscores[docID] += tokenscore
+
         return sorted(docscores.items(), key=lambda x: x[1], reverse=True)
 
 

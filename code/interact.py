@@ -2,7 +2,7 @@ import loadindexfromdisk as lix
 from bm25 import BM25
 from tfidf import TFIDF
 from pymongo import MongoClient
-import lxml.html as parser
+import lxml.html as htmlparser
 import re
 import os
 import argparse
@@ -23,6 +23,7 @@ index = lix.load(args.index)
 bm25 = BM25(index)
 tfidf = TFIDF(index)
 print("Index ready")
+
 
 
 # https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
@@ -87,9 +88,9 @@ def exploration_mode():
 
 def evaluation_mode(runname):
     print("Generating evaluation file...")
-    filename = '../retrieval_results/' + scoring + '-title-description_' + runname + '.txt'
+    filename = '../retrieval_results/' + runname + '_' + args.index + '_' + scoring + '-title'
     resultfile = open(filename, 'w')
-    xmltree = parser.parse('../data/2010-topics.xml')
+    xmltree = htmlparser.parse('../data/2010-topics.xml')
     topics = xmltree.xpath('//topic')
     counter = 1
     topiccount = len(topics)
@@ -100,11 +101,13 @@ def evaluation_mode(runname):
         topicid = t.xpath('@id')[0]
         title = t.xpath('title/text()')[0]
         description = t.xpath('description/text()')[0]
-        query = title + ' ' + description
+        query = title  # + ' ' + description
         if scoring == 'BM25':
             results = bm25.search(query)
         elif scoring == 'TFIDF':
             results = tfidf.search(query)
+        if len(results) < 100:
+            print(query)
         for i in range(100):
             # topic-id, Q0, doc-id, rank, score, run-name
             resultfile.write(topicid + ' ' + 'Q0 ' + str(results[i][0]) + ' ' + str(i+1) + ' ' + str(results[i][1]) + ' ' + runname)
@@ -118,7 +121,7 @@ def evaluation_mode(runname):
         ui_loop()
     elif cmd == 'e':
         cls()
-        evaluation_mode()
+        evaluation_mode(runname)
     ui_loop()
 
 def ui_loop():

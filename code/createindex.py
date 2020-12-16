@@ -22,6 +22,8 @@ client = MongoClient()
 db = client['GIR20']
 db_articles = db.articles
 
+STOP_WORDS = stopwords.words('english')
+
 def text2tokens(text):
     """
     lowercasing, stopword removal, stemming
@@ -38,8 +40,8 @@ def text2tokens(text):
     lower = text.casefold()
     tokens = ""
     for word in lower.split():
-        # if word in stopwords.words('english'):
-        #     continue
+        if word in STOP_WORDS:
+            continue
         alphaNumOnly = re.sub(r'[^a-zA-Z0-9 ]', '', word)
         token = porst.stem(alphaNumOnly)
         tokens += token + " "
