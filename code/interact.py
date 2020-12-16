@@ -25,6 +25,10 @@ tfidf = TFIDF(index)
 print("Index ready")
 
 
+# https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
+def cls():
+    os.system('cls' if os.name=='nt' else 'clear')
+
 def list_articles(results, counter):
     resultlen = len(results)
     if resultlen == 0:
@@ -49,10 +53,10 @@ def list_articles(results, counter):
         print(fullart['text'])
         list_articles(results, counter)
     elif cmd == 'n':
-        os.system('cls')
+        cls()
         list_articles(results, counter+10)
     elif cmd == 'p':
-        os.system('cls')
+        cls()
         if counter == 0:
             print('Can\'t go back, this is the first page.')
             list_articles(results, counter)
@@ -61,9 +65,9 @@ def list_articles(results, counter):
     elif cmd == 'q':
         ui_loop()
     elif cmd == 'x':
-        os.system('cls')
+        cls()
         exploration_mode()
-    os.system('cls')
+    cls()
     list_articles(results, counter)
 
 
@@ -113,21 +117,21 @@ def evaluation_mode(runname):
     if cmd == 'q':
         ui_loop()
     elif cmd == 'e':
-        os.system('cls')
+        cls()
         evaluation_mode()
     ui_loop()
 
 def ui_loop():
     global scoring, other
-    os.system('cls')
+    cls()
     print("### Main menu ###")
     print("Scoring: [{}]\nChoose a mode \n (X) Exploration mode \n (E) Evaluation mode \n (S) Switch to {} \n (Q) Quit".format(scoring,other)) 
     cmd = input('> ').lower()
     if cmd in ['x', 'exploration']:
-        os.system('cls')
+        cls()
         exploration_mode()
     elif cmd in ['e', 'Evaluation']:
-        os.system('cls')
+        cls()
         print('Please enter a name for this run.')
         runname = input('> ')
         evaluation_mode(runname)
